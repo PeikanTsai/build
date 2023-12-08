@@ -93,6 +93,7 @@ XEN_PATH		?= $(ROOT)/xen
 XEN_IMAGE		?= $(XEN_PATH)/xen/xen.efi
 XEN_EXT4		?= $(BINARIES_PATH)/xen.ext4
 XEN_CFG			?= $(ROOT)/build/qemu_v8/xen/xen.cfg
+XEN_DOM0LESS_DTB	?= $(ROOT)/build/qemu_v8/xen/temp_overlay.dtbo
 
 ifeq ($(GICV3),y)
 	TFA_GIC_DRIVER	?= QEMU_GICV3
@@ -419,6 +420,7 @@ $(ROOTFS_UGZ): u-boot buildroot | $(BINARIES_PATH)
 XEN_CONFIGS = .config $(ROOT)/build/kconfigs/xen.conf
 ifeq ($(XEN_DEBUG),y)
 XEN_CONFIGS += $(ROOT)/build/kconfigs/xen_debug.conf
+$(info mark_dbg merge xen_debug.conf)
 endif
 
 ifneq ($(filter 1 2 3,$(SPMC_AT_EL)),)
@@ -450,9 +452,12 @@ xen-create-image: linux buildroot | $(XEN_TMP)
 	cp $(KERNEL_IMAGE) $(XEN_TMP)
 	cp $(XEN_IMAGE) $(XEN_TMP)
 	cp $(XEN_CFG) $(XEN_TMP)
+	cp $(XEN_DOM0LESS_DTB) $(XEN_TMP)
 	cp $(ROOT)/out-br/images/rootfs.cpio.gz $(XEN_TMP)
+	cp $(KERNEL_IMAGE) $(XEN_TMP)/Image_domu1
+	cp $(ROOT)/out-br/images/rootfs.cpio.gz $(XEN_TMP)/rootfs_domu1.cpio.gz
 	rm -f $(XEN_EXT4)
-	mke2fs -t ext4 -d $(XEN_TMP) $(XEN_EXT4) 100M
+	mke2fs -t ext4 -d $(XEN_TMP) $(XEN_EXT4) 200M
 
 
 ################################################################################

@@ -1,0 +1,59 @@
+/dts-v1/;
+/plugin/;
+
+&{/chosen} {
+	#address-cells = <0x02>;
+	#size-cells = <0x01>;
+	xen,xen-bootargs = "console=dtuart noreboot dom0_mem=1G";
+
+	// dom0
+	module@1 {
+		compatible = "multiboot,kernel", "multiboot,module";
+		xen,uefi-binary = "Image";
+		bootargs = "rw root=/dev/ram console=hvc0 earlycon=xenboot";
+	};
+
+	module@2 {
+		compatible = "multiboot,ramdisk", "multiboot,module";
+		xen,uefi-binary = "rootfs.cpio.gz";
+	};
+
+	domU1 {
+		compatible = "xen,domain";
+		#address-cells = <0x02>;
+		#size-cells = <0x01>;
+		memory = <0x00 0x80000>;
+		cpus = <0x01>;
+		vpl011;
+
+		module@1 {
+			compatible = "multiboot,kernel", "multiboot,module";
+			xen,uefi-binary = "Image_domu1";
+			bootargs = "rw root=/dev/ram console=ttyAMA0 earlycon=xenboot";
+		};
+
+		module@2 {
+			compatible = "multiboot,ramdisk", "multiboot,module";
+			xen,uefi-binary = "rootfs_domu1.cpio.gz";
+		};
+	};
+
+//	domU2 {
+//		compatible = "xen,domain";
+//		#address-cells = <0x02>;
+//		#size-cells = <0x01>;
+//		memory = <0x00 0x10000>;
+//		cpus = <0x01>;
+//
+//		module@4c000000 {
+//			compatible = "multiboot,kernel", "multiboot,module";
+//			reg = <0x00 0x4c000000 0xffffff>;
+//			bootargs = "console=ttyAMA0 init=/bin/sh";
+//		};
+//
+//		module@4d000000 {
+//			compatible = "multiboot,ramdisk", "multiboot,module";
+//			reg = <0x00 0x4d000000 0xffffff>;
+//		};
+//	};
+};
